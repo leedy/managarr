@@ -10,6 +10,11 @@ import { ArrowDownTrayIcon, ExclamationCircleIcon, InboxIcon } from '@heroicons/
 import LoadingSpinner from '../components/LoadingSpinner';
 import EmptyState from '../components/EmptyState';
 
+interface StatusMessage {
+  title: string;
+  messages: string[];
+}
+
 interface QueueItem {
   id: string;
   title: string;
@@ -29,6 +34,7 @@ interface QueueItem {
   type: 'movie' | 'episode';
   hasError: boolean;
   errorMessage?: string;
+  statusMessages?: StatusMessage[];
 }
 
 function formatSize(bytes: number): string {
@@ -131,6 +137,7 @@ export default function Queue() {
               type: 'episode',
               hasError: record.trackedDownloadState === 'importBlocked' || record.status === 'failed',
               errorMessage: record.errorMessage,
+              statusMessages: record.statusMessages,
             });
           }
         } catch (error) {
@@ -175,6 +182,7 @@ export default function Queue() {
               type: 'movie',
               hasError: record.trackedDownloadState === 'importBlocked' || record.status === 'failed',
               errorMessage: record.errorMessage,
+              statusMessages: record.statusMessages,
             });
           }
         } catch (error) {
@@ -281,7 +289,7 @@ export default function Queue() {
                       {item.hasError && (
                         <ExclamationCircleIcon className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
                       )}
-                      <div>
+                      <div className="min-w-0">
                         <div className="font-medium">{item.mediaTitle}</div>
                         {item.subtitle && (
                           <div className="text-sm text-gray-400">{item.subtitle}</div>
@@ -289,6 +297,17 @@ export default function Queue() {
                         <div className="text-xs text-gray-500 truncate max-w-md" title={item.title}>
                           {item.title}
                         </div>
+                        {item.hasError && item.statusMessages && item.statusMessages.length > 0 && (
+                          <div className="mt-1 text-xs text-red-400">
+                            {item.statusMessages.map((sm, idx) => (
+                              sm.messages.length > 0 && (
+                                <div key={idx} className="truncate" title={sm.messages.join(', ')}>
+                                  {sm.messages.join(', ')}
+                                </div>
+                              )
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </td>
