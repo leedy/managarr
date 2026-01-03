@@ -53,19 +53,14 @@ const io = new Server(httpServer, {
   },
 });
 
-// Middleware
+// Middleware - minimal helmet config for local network HTTP access
 app.use(helmet({
-  contentSecurityPolicy: isProduction ? {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", "data:", "https:", "http:"],
-      connectSrc: ["'self'", "ws:", "wss:", "http:", "https:"],
-    },
-  } : false,
-  // Disable HSTS - allows HTTP access without forcing HTTPS
+  contentSecurityPolicy: false,
   hsts: false,
+  crossOriginEmbedderPolicy: false,
+  crossOriginOpenerPolicy: false,
+  crossOriginResourcePolicy: false,
+  originAgentCluster: false,
 }));
 app.use(cors({
   origin: isProduction ? true : CLIENT_URL,
