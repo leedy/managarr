@@ -21,9 +21,28 @@ import { settingsRoutes } from './routes/settings.js';
 import { tmdbRoutes } from './routes/tmdb.js';
 
 const PORT = process.env.PORT || 3005;
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/managarr';
 const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5179';
 const isProduction = process.env.NODE_ENV === 'production';
+
+// Build MongoDB URI from individual env vars or use MONGODB_URI directly
+function buildMongoUri(): string {
+  if (process.env.MONGODB_URI) {
+    return process.env.MONGODB_URI;
+  }
+
+  const host = process.env.MONGODB_HOST || 'localhost';
+  const port = process.env.MONGODB_PORT || '27017';
+  const user = process.env.MONGODB_USER;
+  const password = process.env.MONGODB_PASSWORD;
+  const database = process.env.MONGODB_DATABASE || 'managarr';
+
+  if (user && password) {
+    return `mongodb://${user}:${password}@${host}:${port}/${database}?authSource=admin`;
+  }
+  return `mongodb://${host}:${port}/${database}`;
+}
+
+const MONGODB_URI = buildMongoUri();
 
 const app = express();
 const httpServer = createServer(app);
