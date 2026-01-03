@@ -10,6 +10,7 @@ import type {
   RadarrQualityProfile,
   SonarrCutoffUnmetResponse,
   RadarrCutoffUnmetResponse,
+  QueueResponse,
 } from '../types';
 
 const api = axios.create({
@@ -278,6 +279,27 @@ export async function getRadarrCutoffUnmet(
 ): Promise<RadarrCutoffUnmetResponse> {
   const response = await api.get(
     `/radarr/${instanceId}/wanted/cutoff?pageSize=${pageSize}`
+  );
+  return response.data;
+}
+
+// Queue
+export async function getSonarrQueue(
+  instanceId: string,
+  pageSize: number = 100
+): Promise<QueueResponse> {
+  const response = await api.get(
+    `/sonarr/${instanceId}/queue?pageSize=${pageSize}&includeEpisode=true&includeSeries=true`
+  );
+  return response.data;
+}
+
+export async function getRadarrQueue(
+  instanceId: string,
+  pageSize: number = 100
+): Promise<QueueResponse> {
+  const response = await api.get(
+    `/radarr/${instanceId}/queue?pageSize=${pageSize}&includeMovie=true`
   );
   return response.data;
 }

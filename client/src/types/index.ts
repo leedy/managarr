@@ -170,3 +170,46 @@ export interface RadarrCutoffUnmetResponse {
   totalRecords: number;
   records: RadarrCutoffUnmetRecord[];
 }
+
+// Queue Types
+export interface QueueRecord {
+  id: number;
+  title: string;
+  status: string;
+  trackedDownloadState: string;
+  trackedDownloadStatus: string;
+  size: number;
+  sizeleft: number;
+  timeleft: string | null;
+  estimatedCompletionTime?: string;
+  added: string;
+  downloadClient: string;
+  indexer: string;
+  quality: {
+    quality: { id: number; name: string };
+  };
+  errorMessage?: string;
+  statusMessages?: Array<{ title: string; messages: string[] }>;
+}
+
+export interface SonarrQueueRecord extends QueueRecord {
+  seriesId: number;
+  episodeId: number;
+  seasonNumber: number;
+  series?: { id: number; title: string };
+  episode?: { id: number; title: string; episodeNumber: number };
+}
+
+export interface RadarrQueueRecord extends QueueRecord {
+  movieId: number;
+  movie?: { id: number; title: string; year: number };
+}
+
+export interface QueueResponse {
+  page: number;
+  pageSize: number;
+  sortKey: string;
+  sortDirection: string;
+  totalRecords: number;
+  records: QueueRecord[];
+}
