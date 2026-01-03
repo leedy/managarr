@@ -1,11 +1,14 @@
 services:
   managarr:
-    build: .
+    image: ghcr.io/leedy/managarr:latest
     container_name: managarr
     restart: unless-stopped
     ports:
       - "3005:3005"
-    env_file:
-      - /mnt/user/appdata/managarr/.env
     environment:
       NODE_ENV: production
+      MONGODB_HOST: 192.168.1.1
+      MONGODB_PORT: 27017
+      MONGODB_USER: admin
+      MONGODB_PASSWORD: password
+      MONGODB_DATABASE: managarr
