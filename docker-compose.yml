@@ -6,6 +6,7 @@ services:
     ports:
       - "3005:3005"
     environment:
-      - NODE_ENV=production
-      - PORT=3005
-      - MONGODB_URI=${MONGODB_URI:-mongodb://host.docker.internal:27017/managarr}
+      NODE_ENV: production
+      PORT: 3005
+      # Change this to your MongoDB connection string
+      MONGODB_URI: mongodb://host.docker.internal:27017/managarr
