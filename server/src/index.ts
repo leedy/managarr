@@ -61,9 +61,11 @@ app.use(helmet({
       scriptSrc: ["'self'", "'unsafe-inline'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
       imgSrc: ["'self'", "data:", "https:", "http:"],
-      connectSrc: ["'self'", "ws:", "wss:"],
+      connectSrc: ["'self'", "ws:", "wss:", "http:", "https:"],
     },
   } : false,
+  // Disable HSTS - allows HTTP access without forcing HTTPS
+  hsts: false,
 }));
 app.use(cors({
   origin: isProduction ? true : CLIENT_URL,
