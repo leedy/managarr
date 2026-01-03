@@ -11,11 +11,14 @@ import {
   FolderIcon,
   ViewColumnsIcon,
   ChevronDownIcon,
+  TableCellsIcon,
+  Squares2X2Icon,
 } from '@heroicons/react/24/outline';
 import BulkActions from '../components/BulkActions';
 import PathEditModal from '../components/PathEditModal';
 import BulkPathEditModal from '../components/BulkPathEditModal';
 import PosterHover from '../components/PosterHover';
+import PosterCard from '../components/PosterCard';
 
 type SortField = 'title' | 'year' | 'path' | 'sizeOnDisk' | 'added';
 type SortDir = 'asc' | 'desc';
@@ -67,6 +70,8 @@ export default function RadarrMedia() {
   );
   const [showColumnMenu, setShowColumnMenu] = useState(false);
   const [showFullPath, setShowFullPath] = useState(false);
+  const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
+  const [pathFilter, setPathFilter] = useState<string>('');
   const resizingRef = useRef<{ key: ColumnKey; startX: number; startWidth: number } | null>(null);
 
   // Get parent directory (short path) from full path
@@ -105,6 +110,14 @@ export default function RadarrMedia() {
     return map;
   }, [qualityProfiles]);
 
+  // Get unique paths for filter dropdown
+  const uniquePaths = useMemo(() => {
+    if (!movies) return [];
+    const paths = new Set<string>();
+    movies.forEach((m) => paths.add(getShortPath(m.path)));
+    return Array.from(paths).sort();
+  }, [movies]);
+
   // Filter and sort movies
   const filteredMovies = useMemo(() => {
     if (!movies) return [];
@@ -112,6 +125,10 @@ export default function RadarrMedia() {
     let result = movies.filter((m) => {
       // Text search
       if (!m.title.toLowerCase().includes(search.toLowerCase())) {
+        return false;
+      }
+      // Path filter
+      if (pathFilter && getShortPath(m.path) !== pathFilter) {
         return false;
       }
       // Filter mode
@@ -147,7 +164,7 @@ export default function RadarrMedia() {
     });
 
     return result;
-  }, [movies, search, sortField, sortDir, filterMode]);
+  }, [movies, search, sortField, sortDir, filterMode, pathFilter]);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -318,6 +335,20 @@ export default function RadarrMedia() {
 
       {/* Search and bulk actions */}
       <div className="flex items-center gap-4 mb-4">
+        {/* Path filter dropdown */}
+        <select
+          value={pathFilter}
+          onChange={(e) => setPathFilter(e.target.value)}
+          className="input w-auto min-w-[200px]"
+        >
+          <option value="">All Paths</option>
+          {uniquePaths.map((path) => (
+            <option key={path} value={path}>
+              {path}
+            </option>
+          ))}
+        </select>
+
         <div className="relative flex-1 max-w-md">
           <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
           <input
@@ -329,21 +360,50 @@ export default function RadarrMedia() {
           />
         </div>
 
-        {/* Path display toggle */}
-        <button
-          onClick={() => setShowFullPath(!showFullPath)}
-          className={`btn ${showFullPath ? 'btn-primary' : 'btn-secondary'} flex items-center gap-2`}
-          title={showFullPath ? 'Showing full path' : 'Showing parent directory only'}
-        >
-          <FolderIcon className="w-5 h-5" />
-          {showFullPath ? 'Full Path' : 'Short Path'}
-        </button>
-
-        {/* Column visibility toggle */}
-        <div className="relative">
+        {/* View mode toggle */}
+        <div className="flex rounded-lg overflow-hidden border border-gray-600">
           <button
-            onClick={() => setShowColumnMenu(!showColumnMenu)}
-            className="btn btn-secondary flex items-center gap-2"
+            onClick={() => setViewMode('table')}
+            className={`p-2 ${
+              viewMode === 'table'
+                ? 'bg-primary-600 text-white'
+                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            }`}
+            title="Table view"
+          >
+            <TableCellsIcon className="w-5 h-5" />
+          </button>
+          <button
+            onClick={() => setViewMode('grid')}
+            className={`p-2 border-l border-gray-600 ${
+              viewMode === 'grid'
+                ? 'bg-primary-600 text-white'
+                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            }`}
+            title="Grid view"
+          >
+            <Squares2X2Icon className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Path display toggle - only show in table view */}
+        {viewMode === 'table' && (
+          <button
+            onClick={() => setShowFullPath(!showFullPath)}
+            className={`btn ${showFullPath ? 'btn-primary' : 'btn-secondary'} flex items-center gap-2`}
+            title={showFullPath ? 'Showing full path' : 'Showing parent directory only'}
+          >
+            <FolderIcon className="w-5 h-5" />
+            {showFullPath ? 'Full Path' : 'Short Path'}
+          </button>
+        )}
+
+        {/* Column visibility toggle - only show in table view */}
+        {viewMode === 'table' && (
+          <div className="relative">
+            <button
+              onClick={() => setShowColumnMenu(!showColumnMenu)}
+              className="btn btn-secondary flex items-center gap-2"
           >
             <ViewColumnsIcon className="w-5 h-5" />
             Columns
@@ -375,7 +435,8 @@ export default function RadarrMedia() {
               </div>
             </>
           )}
-        </div>
+          </div>
+        )}
 
         {selectedIds.size > 0 && (
           <BulkActions
@@ -389,15 +450,31 @@ export default function RadarrMedia() {
         )}
       </div>
 
-      {/* Movies table */}
-      <div className="card overflow-hidden overflow-x-auto">
-        {moviesLoading ? (
-          <div className="p-8 text-center text-gray-400">Loading movies...</div>
-        ) : !filteredMovies.length ? (
-          <div className="p-8 text-center text-gray-400">
-            {search ? 'No movies match your search' : 'No movies found'}
-          </div>
-        ) : (
+      {/* Movies display */}
+      {moviesLoading ? (
+        <div className="card p-8 text-center text-gray-400">Loading movies...</div>
+      ) : !filteredMovies.length ? (
+        <div className="card p-8 text-center text-gray-400">
+          {search ? 'No movies match your search' : 'No movies found'}
+        </div>
+      ) : viewMode === 'grid' ? (
+        /* Grid View */
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+          {filteredMovies.map((m) => (
+            <PosterCard
+              key={m.id}
+              tmdbId={m.tmdbId}
+              type="movie"
+              title={m.title}
+              year={m.year}
+              selected={selectedIds.has(m.id)}
+              onSelect={() => toggleSelect(m.id)}
+            />
+          ))}
+        </div>
+      ) : (
+        /* Table View */
+        <div className="card overflow-hidden overflow-x-auto">
           <table className="w-full" style={{ minWidth: 'max-content' }}>
             <thead className="bg-gray-700/50 text-left text-sm text-gray-400">
               <tr>
@@ -515,8 +592,8 @@ export default function RadarrMedia() {
               ))}
             </tbody>
           </table>
-        )}
-      </div>
+        </div>
+      )}
 
       {filteredMovies.length > 0 && (
         <div className="mt-4 text-sm text-gray-400">

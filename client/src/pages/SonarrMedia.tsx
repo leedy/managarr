@@ -11,11 +11,14 @@ import {
   FolderIcon,
   ViewColumnsIcon,
   ChevronDownIcon,
+  TableCellsIcon,
+  Squares2X2Icon,
 } from '@heroicons/react/24/outline';
 import BulkActions from '../components/BulkActions';
 import PathEditModal from '../components/PathEditModal';
 import BulkPathEditModal from '../components/BulkPathEditModal';
 import PosterHover from '../components/PosterHover';
+import PosterCard from '../components/PosterCard';
 
 type SortField = 'title' | 'year' | 'path' | 'sizeOnDisk' | 'episodeFileCount';
 type SortDir = 'asc' | 'desc';
@@ -66,6 +69,8 @@ export default function SonarrMedia() {
   );
   const [showColumnMenu, setShowColumnMenu] = useState(false);
   const [showFullPath, setShowFullPath] = useState(false);
+  const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
+  const [pathFilter, setPathFilter] = useState<string>('');
   const resizingRef = useRef<{ key: ColumnKey; startX: number; startWidth: number } | null>(null);
 
   // Get parent directory (short path) from full path
@@ -104,6 +109,14 @@ export default function SonarrMedia() {
     return map;
   }, [qualityProfiles]);
 
+  // Get unique paths for filter dropdown
+  const uniquePaths = useMemo(() => {
+    if (!series) return [];
+    const paths = new Set<string>();
+    series.forEach((s) => paths.add(getShortPath(s.path)));
+    return Array.from(paths).sort();
+  }, [series]);
+
   // Filter and sort series
   const filteredSeries = useMemo(() => {
     if (!series) return [];
@@ -111,6 +124,10 @@ export default function SonarrMedia() {
     let result = series.filter((s) => {
       // Text search
       if (!s.title.toLowerCase().includes(search.toLowerCase())) {
+        return false;
+      }
+      // Path filter
+      if (pathFilter && getShortPath(s.path) !== pathFilter) {
         return false;
       }
       // Filter mode - for series, "downloaded" means has at least one episode file
@@ -143,7 +160,7 @@ export default function SonarrMedia() {
     });
 
     return result;
-  }, [series, search, sortField, sortDir, filterMode]);
+  }, [series, search, sortField, sortDir, filterMode, pathFilter]);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -304,6 +321,20 @@ export default function SonarrMedia() {
 
       {/* Search and bulk actions */}
       <div className="flex items-center gap-4 mb-4">
+        {/* Path filter dropdown */}
+        <select
+          value={pathFilter}
+          onChange={(e) => setPathFilter(e.target.value)}
+          className="input w-auto min-w-[200px]"
+        >
+          <option value="">All Paths</option>
+          {uniquePaths.map((path) => (
+            <option key={path} value={path}>
+              {path}
+            </option>
+          ))}
+        </select>
+
         <div className="relative flex-1 max-w-md">
           <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
           <input
@@ -315,53 +346,83 @@ export default function SonarrMedia() {
           />
         </div>
 
-        {/* Path display toggle */}
-        <button
-          onClick={() => setShowFullPath(!showFullPath)}
-          className={`btn ${showFullPath ? 'btn-primary' : 'btn-secondary'} flex items-center gap-2`}
-          title={showFullPath ? 'Showing full path' : 'Showing parent directory only'}
-        >
-          <FolderIcon className="w-5 h-5" />
-          {showFullPath ? 'Full Path' : 'Short Path'}
-        </button>
-
-        {/* Column visibility toggle */}
-        <div className="relative">
+        {/* View mode toggle */}
+        <div className="flex rounded-lg overflow-hidden border border-gray-600">
           <button
-            onClick={() => setShowColumnMenu(!showColumnMenu)}
-            className="btn btn-secondary flex items-center gap-2"
+            onClick={() => setViewMode('table')}
+            className={`p-2 ${
+              viewMode === 'table'
+                ? 'bg-primary-600 text-white'
+                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            }`}
+            title="Table view"
           >
-            <ViewColumnsIcon className="w-5 h-5" />
-            Columns
-            <ChevronDownIcon className="w-4 h-4" />
+            <TableCellsIcon className="w-5 h-5" />
           </button>
-          {showColumnMenu && (
-            <>
-              <div
-                className="fixed inset-0 z-10"
-                onClick={() => setShowColumnMenu(false)}
-              />
-              <div className="absolute right-0 mt-2 w-48 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-20">
-                <div className="p-2 space-y-1">
-                  {COLUMNS.map((col) => (
-                    <label
-                      key={col.key}
-                      className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-700 rounded cursor-pointer"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={visibleColumns.has(col.key)}
-                        onChange={() => toggleColumnVisibility(col.key)}
-                        className="w-4 h-4 rounded bg-gray-700 border-gray-600"
-                      />
-                      <span className="text-sm">{col.label}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            </>
-          )}
+          <button
+            onClick={() => setViewMode('grid')}
+            className={`p-2 border-l border-gray-600 ${
+              viewMode === 'grid'
+                ? 'bg-primary-600 text-white'
+                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            }`}
+            title="Grid view"
+          >
+            <Squares2X2Icon className="w-5 h-5" />
+          </button>
         </div>
+
+        {/* Path display toggle - only show in table view */}
+        {viewMode === 'table' && (
+          <button
+            onClick={() => setShowFullPath(!showFullPath)}
+            className={`btn ${showFullPath ? 'btn-primary' : 'btn-secondary'} flex items-center gap-2`}
+            title={showFullPath ? 'Showing full path' : 'Showing parent directory only'}
+          >
+            <FolderIcon className="w-5 h-5" />
+            {showFullPath ? 'Full Path' : 'Short Path'}
+          </button>
+        )}
+
+        {/* Column visibility toggle - only show in table view */}
+        {viewMode === 'table' && (
+          <div className="relative">
+            <button
+              onClick={() => setShowColumnMenu(!showColumnMenu)}
+              className="btn btn-secondary flex items-center gap-2"
+            >
+              <ViewColumnsIcon className="w-5 h-5" />
+              Columns
+              <ChevronDownIcon className="w-4 h-4" />
+            </button>
+            {showColumnMenu && (
+              <>
+                <div
+                  className="fixed inset-0 z-10"
+                  onClick={() => setShowColumnMenu(false)}
+                />
+                <div className="absolute right-0 mt-2 w-48 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-20">
+                  <div className="p-2 space-y-1">
+                    {COLUMNS.map((col) => (
+                      <label
+                        key={col.key}
+                        className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-700 rounded cursor-pointer"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={visibleColumns.has(col.key)}
+                          onChange={() => toggleColumnVisibility(col.key)}
+                          className="w-4 h-4 rounded bg-gray-700 border-gray-600"
+                        />
+                        <span className="text-sm">{col.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        )}
 
         {selectedIds.size > 0 && (
           <BulkActions
@@ -375,15 +436,31 @@ export default function SonarrMedia() {
         )}
       </div>
 
-      {/* Series table */}
-      <div className="card overflow-hidden overflow-x-auto">
-        {seriesLoading ? (
-          <div className="p-8 text-center text-gray-400">Loading series...</div>
-        ) : !filteredSeries.length ? (
-          <div className="p-8 text-center text-gray-400">
-            {search ? 'No series match your search' : 'No series found'}
-          </div>
-        ) : (
+      {/* Series display */}
+      {seriesLoading ? (
+        <div className="card p-8 text-center text-gray-400">Loading series...</div>
+      ) : !filteredSeries.length ? (
+        <div className="card p-8 text-center text-gray-400">
+          {search ? 'No series match your search' : 'No series found'}
+        </div>
+      ) : viewMode === 'grid' ? (
+        /* Grid View */
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+          {filteredSeries.map((s) => (
+            <PosterCard
+              key={s.id}
+              tvdbId={s.tvdbId}
+              type="tv"
+              title={s.title}
+              year={s.year}
+              selected={selectedIds.has(s.id)}
+              onSelect={() => toggleSelect(s.id)}
+            />
+          ))}
+        </div>
+      ) : (
+        /* Table View */
+        <div className="card overflow-hidden overflow-x-auto">
           <table className="w-full" style={{ minWidth: 'max-content' }}>
             <thead className="bg-gray-700/50 text-left text-sm text-gray-400">
               <tr>
@@ -487,8 +564,8 @@ export default function SonarrMedia() {
               ))}
             </tbody>
           </table>
-        )}
-      </div>
+        </div>
+      )}
 
       {filteredSeries.length > 0 && (
         <div className="mt-4 text-sm text-gray-400">
