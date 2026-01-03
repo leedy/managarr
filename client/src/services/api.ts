@@ -8,6 +8,8 @@ import type {
   SonarrQualityProfile,
   RadarrMovie,
   RadarrQualityProfile,
+  SonarrCutoffUnmetResponse,
+  RadarrCutoffUnmetResponse,
 } from '../types';
 
 const api = axios.create({
@@ -256,5 +258,26 @@ export async function findByExternalId(
   source: 'tvdb_id' | 'imdb_id'
 ): Promise<TmdbFindResult> {
   const response = await api.get(`/tmdb/find/${externalId}?source=${source}`);
+  return response.data;
+}
+
+// Cutoff Unmet
+export async function getSonarrCutoffUnmet(
+  instanceId: string,
+  pageSize: number = 1000
+): Promise<SonarrCutoffUnmetResponse> {
+  const response = await api.get(
+    `/sonarr/${instanceId}/wanted/cutoff?pageSize=${pageSize}&includeSeries=true&includeEpisodeFile=true`
+  );
+  return response.data;
+}
+
+export async function getRadarrCutoffUnmet(
+  instanceId: string,
+  pageSize: number = 1000
+): Promise<RadarrCutoffUnmetResponse> {
+  const response = await api.get(
+    `/radarr/${instanceId}/wanted/cutoff?pageSize=${pageSize}`
+  );
   return response.data;
 }

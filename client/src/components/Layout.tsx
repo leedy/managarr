@@ -10,6 +10,8 @@ import {
   CircleStackIcon,
   PlayIcon,
   ArrowsRightLeftIcon,
+  ExclamationTriangleIcon,
+  DocumentDuplicateIcon,
 } from '@heroicons/react/24/outline';
 import ActivityIndicator from './ActivityIndicator';
 
@@ -42,6 +44,8 @@ const navigation: NavSection[] = [
       { name: 'Quality Profiles', href: '/quality', icon: Square3Stack3DIcon },
       { name: 'Disk Space', href: '/disk-space', icon: CircleStackIcon },
       { name: 'Compare', href: '/compare', icon: ArrowsRightLeftIcon },
+      { name: 'Cutoff Unmet', href: '/cutoff', icon: ExclamationTriangleIcon },
+      { name: 'Duplicates', href: '/duplicates', icon: DocumentDuplicateIcon },
     ],
   },
   {

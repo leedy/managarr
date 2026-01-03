@@ -103,3 +103,70 @@ export interface RadarrQualityProfile {
   id: number;
   name: string;
 }
+
+// Cutoff Unmet Types
+export interface SonarrCutoffUnmetRecord {
+  id: number;
+  seriesId: number;
+  tvdbId?: number;
+  episodeFileId: number;
+  seasonNumber: number;
+  episodeNumber: number;
+  title: string;
+  airDate?: string;
+  airDateUtc?: string;
+  hasFile: boolean;
+  monitored: boolean;
+  series: {
+    id: number;
+    title: string;
+    year: number;
+    path: string;
+    tvdbId?: number;
+  };
+  episodeFile?: {
+    id: number;
+    relativePath: string;
+    quality: {
+      quality: { id: number; name: string };
+    };
+  };
+}
+
+export interface SonarrCutoffUnmetResponse {
+  page: number;
+  pageSize: number;
+  sortKey: string;
+  sortDirection: string;
+  totalRecords: number;
+  records: SonarrCutoffUnmetRecord[];
+}
+
+export interface RadarrCutoffUnmetRecord {
+  id: number;
+  title: string;
+  sortTitle: string;
+  year: number;
+  path: string;
+  tmdbId?: number;
+  imdbId?: string;
+  monitored: boolean;
+  hasFile: boolean;
+  sizeOnDisk: number;
+  movieFile?: {
+    id: number;
+    relativePath: string;
+    quality: {
+      quality: { id: number; name: string };
+    };
+  };
+}
+
+export interface RadarrCutoffUnmetResponse {
+  page: number;
+  pageSize: number;
+  sortKey: string;
+  sortDirection: string;
+  totalRecords: number;
+  records: RadarrCutoffUnmetRecord[];
+}
