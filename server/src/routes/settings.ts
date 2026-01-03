@@ -79,4 +79,32 @@ router.put('/plex/excluded-libraries', async (req: Request, res: Response) => {
   }
 });
 
+// Get TMDB API key
+router.get('/tmdb/api-key', async (_req: Request, res: Response) => {
+  try {
+    const apiKey = await getSetting<string>(SETTING_KEYS.TMDB_API_KEY, '');
+    res.json({ apiKey });
+  } catch (error) {
+    console.error('Error fetching TMDB API key:', error);
+    res.status(500).json({ error: 'Failed to fetch TMDB API key' });
+  }
+});
+
+// Update TMDB API key
+router.put('/tmdb/api-key', async (req: Request, res: Response) => {
+  try {
+    const { apiKey } = req.body;
+
+    if (typeof apiKey !== 'string') {
+      return res.status(400).json({ error: 'API key must be a string' });
+    }
+
+    await setSetting(SETTING_KEYS.TMDB_API_KEY, apiKey);
+    res.json({ apiKey });
+  } catch (error) {
+    console.error('Error updating TMDB API key:', error);
+    res.status(500).json({ error: 'Failed to update TMDB API key' });
+  }
+});
+
 export { router as settingsRoutes };

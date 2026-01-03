@@ -43,4 +43,5 @@ export async function setSetting<T>(key: string, value: T): Promise<void> {
 // Setting keys
 export const SETTING_KEYS = {
   EXCLUDED_PLEX_LIBRARIES: 'excludedPlexLibraries',
+  TMDB_API_KEY: 'tmdbApiKey',
 } as const;

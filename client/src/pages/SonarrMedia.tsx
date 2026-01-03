@@ -15,6 +15,7 @@ import {
 import BulkActions from '../components/BulkActions';
 import PathEditModal from '../components/PathEditModal';
 import BulkPathEditModal from '../components/BulkPathEditModal';
+import PosterHover from '../components/PosterHover';
 
 type SortField = 'title' | 'year' | 'path' | 'sizeOnDisk' | 'episodeFileCount';
 type SortDir = 'asc' | 'desc';
@@ -436,7 +437,11 @@ export default function SonarrMedia() {
                       className="p-3"
                       style={{ width: columnWidths[col.key], maxWidth: columnWidths[col.key] }}
                     >
-                      {col.key === 'title' && <span className="font-medium truncate block">{s.title}</span>}
+                      {col.key === 'title' && (
+                        <PosterHover tvdbId={s.tvdbId} type="tv">
+                          <span className="font-medium truncate block">{s.title}</span>
+                        </PosterHover>
+                      )}
                       {col.key === 'year' && <span className="text-gray-400">{s.year}</span>}
                       {col.key === 'path' && (
                         <div className="flex items-center gap-2 group">

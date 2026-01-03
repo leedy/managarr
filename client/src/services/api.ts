@@ -205,3 +205,56 @@ export async function getExcludedPlexLibraries(): Promise<string[]> {
 export async function setExcludedPlexLibraries(libraries: string[]): Promise<void> {
   await api.put('/settings/plex/excluded-libraries', { libraries });
 }
+
+// TMDB
+export async function getTmdbApiKey(): Promise<string> {
+  const response = await api.get('/settings/tmdb/api-key');
+  return response.data.apiKey;
+}
+
+export async function setTmdbApiKey(apiKey: string): Promise<void> {
+  await api.put('/settings/tmdb/api-key', { apiKey });
+}
+
+export interface TmdbMovieDetails {
+  id: number;
+  title: string;
+  poster_path: string | null;
+  backdrop_path: string | null;
+  overview: string;
+  release_date: string;
+  vote_average: number;
+}
+
+export interface TmdbTvDetails {
+  id: number;
+  name: string;
+  poster_path: string | null;
+  backdrop_path: string | null;
+  overview: string;
+  first_air_date: string;
+  vote_average: number;
+}
+
+export interface TmdbFindResult {
+  movie_results: TmdbMovieDetails[];
+  tv_results: TmdbTvDetails[];
+}
+
+export async function getTmdbMovie(tmdbId: number): Promise<TmdbMovieDetails> {
+  const response = await api.get(`/tmdb/movie/${tmdbId}`);
+  return response.data;
+}
+
+export async function getTmdbTv(tmdbId: number): Promise<TmdbTvDetails> {
+  const response = await api.get(`/tmdb/tv/${tmdbId}`);
+  return response.data;
+}
+
+export async function findByExternalId(
+  externalId: string,
+  source: 'tvdb_id' | 'imdb_id'
+): Promise<TmdbFindResult> {
+  const response = await api.get(`/tmdb/find/${externalId}?source=${source}`);
+  return response.data;
+}

@@ -17,6 +17,7 @@ import { radarrRoutes } from './routes/radarr.js';
 import { plexRoutes } from './routes/plex.js';
 import { healthRoutes } from './routes/health.js';
 import { settingsRoutes } from './routes/settings.js';
+import { tmdbRoutes } from './routes/tmdb.js';
 
 const PORT = process.env.PORT || 3005;
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/managarr';
@@ -45,6 +46,7 @@ app.use('/api/radarr', radarrRoutes);
 app.use('/api/plex', plexRoutes);
 app.use('/api/health', healthRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/tmdb', tmdbRoutes);
 
 // Health check endpoint
 app.get('/api/ping', (_req, res) => {

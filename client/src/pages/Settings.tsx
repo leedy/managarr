@@ -4,9 +4,11 @@ import {
   getInstancesByType,
   getExcludedPlexLibraries,
   setExcludedPlexLibraries,
+  getTmdbApiKey,
+  setTmdbApiKey,
 } from '../services/api';
 import axios from 'axios';
-import { CheckIcon } from '@heroicons/react/24/outline';
+import { CheckIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 
 interface PlexLibrary {
   key: string;
@@ -18,6 +20,11 @@ export default function Settings() {
   const queryClient = useQueryClient();
   const [selectedLibraries, setSelectedLibraries] = useState<Set<string>>(new Set());
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+
+  // TMDB state
+  const [tmdbKey, setTmdbKey] = useState('');
+  const [showTmdbKey, setShowTmdbKey] = useState(false);
+  const [tmdbSaveStatus, setTmdbSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
 
   // Fetch Plex instances
   const { data: plexInstances } = useQuery({
@@ -62,12 +69,25 @@ export default function Settings() {
     queryFn: getExcludedPlexLibraries,
   });
 
+  // Fetch TMDB API key
+  const { data: savedTmdbKey } = useQuery({
+    queryKey: ['tmdb-api-key'],
+    queryFn: getTmdbApiKey,
+  });
+
   // Initialize selected libraries from saved settings
   useEffect(() => {
     if (excludedLibraries) {
       setSelectedLibraries(new Set(excludedLibraries));
     }
   }, [excludedLibraries]);
+
+  // Initialize TMDB key from saved settings
+  useEffect(() => {
+    if (savedTmdbKey !== undefined) {
+      setTmdbKey(savedTmdbKey);
+    }
+  }, [savedTmdbKey]);
 
   // Save mutation
   const saveMutation = useMutation({
@@ -76,6 +96,16 @@ export default function Settings() {
       queryClient.invalidateQueries({ queryKey: ['excluded-plex-libraries'] });
       setSaveStatus('saved');
       setTimeout(() => setSaveStatus('idle'), 2000);
+    },
+  });
+
+  // TMDB save mutation
+  const tmdbSaveMutation = useMutation({
+    mutationFn: (apiKey: string) => setTmdbApiKey(apiKey),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tmdb-api-key'] });
+      setTmdbSaveStatus('saved');
+      setTimeout(() => setTmdbSaveStatus('idle'), 2000);
     },
   });
 
@@ -116,6 +146,15 @@ export default function Settings() {
       if (!current.has(lib)) return true;
     }
     return false;
+  };
+
+  const hasTmdbChanges = () => {
+    return tmdbKey !== (savedTmdbKey || '');
+  };
+
+  const handleTmdbSave = () => {
+    setTmdbSaveStatus('saving');
+    tmdbSaveMutation.mutate(tmdbKey);
   };
 
   return (
@@ -182,6 +221,75 @@ export default function Settings() {
             )}
           </button>
           {hasChanges() && saveStatus === 'idle' && (
+            <span className="text-sm text-yellow-400">You have unsaved changes</span>
+          )}
+        </div>
+      </div>
+
+      {/* TMDB Settings */}
+      <div className="card mt-6">
+        <div className="p-4 border-b border-gray-700">
+          <h2 className="text-lg font-semibold">TMDB Integration</h2>
+          <p className="text-sm text-gray-400 mt-1">
+            Configure your TMDB API key to enable poster previews on hover in the media lists.
+            Get a free API key at{' '}
+            <a
+              href="https://www.themoviedb.org/settings/api"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary-400 hover:text-primary-300 underline"
+            >
+              themoviedb.org
+            </a>
+          </p>
+        </div>
+
+        <div className="p-4">
+          <label className="block text-sm font-medium text-gray-300 mb-2">
+            API Key
+          </label>
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <input
+                type={showTmdbKey ? 'text' : 'password'}
+                value={tmdbKey}
+                onChange={(e) => setTmdbKey(e.target.value)}
+                placeholder="Enter your TMDB API key"
+                className="w-full px-3 py-2 pr-10 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              />
+              <button
+                type="button"
+                onClick={() => setShowTmdbKey(!showTmdbKey)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-white"
+              >
+                {showTmdbKey ? (
+                  <EyeSlashIcon className="w-5 h-5" />
+                ) : (
+                  <EyeIcon className="w-5 h-5" />
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-4 border-t border-gray-700 flex items-center gap-4">
+          <button
+            onClick={handleTmdbSave}
+            disabled={!hasTmdbChanges() || tmdbSaveMutation.isPending}
+            className="btn btn-primary flex items-center gap-2"
+          >
+            {tmdbSaveStatus === 'saving' ? (
+              'Saving...'
+            ) : tmdbSaveStatus === 'saved' ? (
+              <>
+                <CheckIcon className="w-4 h-4" />
+                Saved
+              </>
+            ) : (
+              'Save API Key'
+            )}
+          </button>
+          {hasTmdbChanges() && tmdbSaveStatus === 'idle' && (
             <span className="text-sm text-yellow-400">You have unsaved changes</span>
           )}
         </div>

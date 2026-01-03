@@ -15,6 +15,7 @@ import {
 import BulkActions from '../components/BulkActions';
 import PathEditModal from '../components/PathEditModal';
 import BulkPathEditModal from '../components/BulkPathEditModal';
+import PosterHover from '../components/PosterHover';
 
 type SortField = 'title' | 'year' | 'path' | 'sizeOnDisk' | 'added';
 type SortDir = 'asc' | 'desc';
@@ -450,7 +451,11 @@ export default function RadarrMedia() {
                       className="p-3"
                       style={{ width: columnWidths[col.key], maxWidth: columnWidths[col.key] }}
                     >
-                      {col.key === 'title' && <span className="font-medium truncate block">{m.title}</span>}
+                      {col.key === 'title' && (
+                        <PosterHover tmdbId={m.tmdbId} type="movie">
+                          <span className="font-medium truncate block">{m.title}</span>
+                        </PosterHover>
+                      )}
                       {col.key === 'year' && <span className="text-gray-400">{m.year}</span>}
                       {col.key === 'path' && (
                         <div className="flex items-center gap-2 group">
