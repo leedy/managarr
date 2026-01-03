@@ -213,3 +213,43 @@ export interface QueueResponse {
   totalRecords: number;
   records: QueueRecord[];
 }
+
+// History Types
+export interface HistoryRecord {
+  id: number;
+  sourceTitle: string;
+  eventType: 'grabbed' | 'downloadFolderImported' | 'downloadFailed' | 'movieFileDeleted' | 'episodeFileDeleted' | 'movieFileRenamed' | 'episodeFileRenamed' | string;
+  date: string;
+  quality: {
+    quality: { id: number; name: string };
+  };
+  downloadId?: string;
+  data?: {
+    indexer?: string;
+    downloadClient?: string;
+    releaseGroup?: string;
+    size?: string;
+    reason?: string;
+  };
+}
+
+export interface SonarrHistoryRecord extends HistoryRecord {
+  seriesId: number;
+  episodeId: number;
+  series?: { id: number; title: string };
+  episode?: { id: number; title: string; seasonNumber: number; episodeNumber: number };
+}
+
+export interface RadarrHistoryRecord extends HistoryRecord {
+  movieId: number;
+  movie?: { id: number; title: string; year: number };
+}
+
+export interface HistoryResponse {
+  page: number;
+  pageSize: number;
+  sortKey: string;
+  sortDirection: string;
+  totalRecords: number;
+  records: HistoryRecord[];
+}

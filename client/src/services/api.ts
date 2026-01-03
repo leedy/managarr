@@ -11,6 +11,7 @@ import type {
   SonarrCutoffUnmetResponse,
   RadarrCutoffUnmetResponse,
   QueueResponse,
+  HistoryResponse,
 } from '../types';
 
 const api = axios.create({
@@ -300,6 +301,27 @@ export async function getRadarrQueue(
 ): Promise<QueueResponse> {
   const response = await api.get(
     `/radarr/${instanceId}/queue?pageSize=${pageSize}&includeMovie=true`
+  );
+  return response.data;
+}
+
+// History
+export async function getSonarrHistory(
+  instanceId: string,
+  pageSize: number = 50
+): Promise<HistoryResponse> {
+  const response = await api.get(
+    `/sonarr/${instanceId}/history?pageSize=${pageSize}&includeSeries=true&includeEpisode=true`
+  );
+  return response.data;
+}
+
+export async function getRadarrHistory(
+  instanceId: string,
+  pageSize: number = 50
+): Promise<HistoryResponse> {
+  const response = await api.get(
+    `/radarr/${instanceId}/history?pageSize=${pageSize}&includeMovie=true`
   );
   return response.data;
 }

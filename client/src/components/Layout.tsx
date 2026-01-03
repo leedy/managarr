@@ -13,6 +13,7 @@ import {
   ExclamationTriangleIcon,
   DocumentDuplicateIcon,
   ArrowDownTrayIcon,
+  ClockIcon,
 } from '@heroicons/react/24/outline';
 import ActivityIndicator from './ActivityIndicator';
 
@@ -30,6 +31,7 @@ const navigation: NavSection[] = [
     items: [
       { name: 'Dashboard', href: '/', icon: HomeIcon },
       { name: 'Queue', href: '/queue', icon: ArrowDownTrayIcon },
+      { name: 'Activity', href: '/activity', icon: ClockIcon },
     ],
   },
   {
