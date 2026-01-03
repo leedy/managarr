@@ -4,12 +4,12 @@ services:
     container_name: managarr
     restart: unless-stopped
     ports:
-      - "3005:3005"
+      - "${PORT:-3005}:3005"
     environment:
       NODE_ENV: production
-      PORT: 3005
-      MONGODB_HOST: 192.168.1.1
-      MONGODB_PORT: 27017
-      MONGODB_USER: admin
-      MONGODB_PASSWORD: password
-      MONGODB_DATABASE: managarr
+      PORT: ${PORT:-3005}
+      MONGODB_HOST: ${MONGODB_HOST}
+      MONGODB_PORT: ${MONGODB_PORT:-27017}
+      MONGODB_USER: ${MONGODB_USER}
+      MONGODB_PASSWORD: ${MONGODB_PASSWORD}
+      MONGODB_DATABASE: ${MONGODB_DATABASE:-managarr}
