@@ -58,7 +58,7 @@ export default function InstanceForm() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: typeof formData }) =>
+    mutationFn: ({ id, data }: { id: string; data: Partial<typeof formData> }) =>
       updateInstance(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['instances'] });
@@ -72,9 +72,8 @@ export default function InstanceForm() {
 
     if (isEditing && id) {
       // Only include apiKey if it was changed
-      const updateData = formData.apiKey
-        ? formData
-        : { ...formData, apiKey: undefined };
+      const { apiKey, ...restData } = formData;
+      const updateData = apiKey ? formData : restData;
       updateMutation.mutate({ id, data: updateData });
     } else {
       createMutation.mutate(formData);

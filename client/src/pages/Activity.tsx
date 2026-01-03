@@ -13,7 +13,10 @@ import {
   XCircleIcon,
   TrashIcon,
   ArrowPathIcon,
+  InboxIcon,
 } from '@heroicons/react/24/outline';
+import LoadingSpinner from '../components/LoadingSpinner';
+import EmptyState from '../components/EmptyState';
 
 interface ActivityItem {
   id: string;
@@ -256,11 +259,13 @@ export default function Activity() {
       {/* Activity Timeline */}
       <div className="card overflow-hidden">
         {isLoading ? (
-          <div className="p-8 text-center text-gray-400">Loading...</div>
+          <LoadingSpinner text="Loading activity history..." />
         ) : allItems.length === 0 ? (
-          <div className="p-8 text-center text-gray-400">
-            No activity history found.
-          </div>
+          <EmptyState
+            icon={<InboxIcon className="w-12 h-12" />}
+            title="No activity yet"
+            description="Activity will appear here as Sonarr and Radarr download and import media."
+          />
         ) : (
           <div className="divide-y divide-gray-700">
             {groupedByDate.map(([dateLabel, items]) => (

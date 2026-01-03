@@ -6,7 +6,9 @@ import {
   getRadarrQueue,
 } from '../services/api';
 import type { SonarrQueueRecord, RadarrQueueRecord } from '../types';
-import { ArrowDownTrayIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
+import { ArrowDownTrayIcon, ExclamationCircleIcon, InboxIcon } from '@heroicons/react/24/outline';
+import LoadingSpinner from '../components/LoadingSpinner';
+import EmptyState from '../components/EmptyState';
 
 interface QueueItem {
   id: string;
@@ -251,11 +253,13 @@ export default function Queue() {
       {/* Queue Table */}
       <div className="card overflow-hidden">
         {isLoading ? (
-          <div className="p-8 text-center text-gray-400">Loading...</div>
+          <LoadingSpinner text="Loading download queue..." />
         ) : allItems.length === 0 ? (
-          <div className="p-8 text-center text-gray-400">
-            No items in download queue.
-          </div>
+          <EmptyState
+            icon={<InboxIcon className="w-12 h-12" />}
+            title="Queue is empty"
+            description="No active downloads. Items will appear here when Sonarr or Radarr start downloading."
+          />
         ) : (
           <table className="w-full">
             <thead className="bg-gray-700/50 text-left text-sm text-gray-400">

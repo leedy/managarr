@@ -1,7 +1,7 @@
 import { useState, useMemo, useRef, useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getInstancesByType, getSonarrSeries, getSonarrQualityProfiles, updateSonarrSeriesPath } from '../services/api';
-import type { SonarrSeries, Instance } from '../types';
+import type { SonarrSeries } from '../types';
 import {
   MagnifyingGlassIcon,
   CheckCircleIcon,

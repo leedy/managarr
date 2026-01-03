@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   HomeIcon,
@@ -14,6 +14,8 @@ import {
   DocumentDuplicateIcon,
   ArrowDownTrayIcon,
   ClockIcon,
+  Bars3Icon,
+  XMarkIcon,
 } from '@heroicons/react/24/outline';
 import ActivityIndicator from './ActivityIndicator';
 
@@ -63,15 +65,38 @@ const navigation: NavSection[] = [
 
 export default function Layout({ children }: LayoutProps) {
   const location = useLocation();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const handleNavClick = () => {
+    setSidebarOpen(false);
+  };
 
   return (
     <div className="min-h-screen bg-gray-900">
+      {/* Mobile sidebar overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="fixed inset-y-0 left-0 w-64 bg-gray-800 border-r border-gray-700">
-        <div className="flex items-center h-16 px-6 border-b border-gray-700">
+      <aside
+        className={`fixed inset-y-0 left-0 w-64 bg-gray-800 border-r border-gray-700 z-50 transform transition-transform duration-200 ease-in-out lg:translate-x-0 ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        <div className="flex items-center justify-between h-16 px-6 border-b border-gray-700">
           <h1 className="text-xl font-bold text-primary-400">Managarr</h1>
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="lg:hidden p-1 text-gray-400 hover:text-white"
+          >
+            <XMarkIcon className="w-6 h-6" />
+          </button>
         </div>
-        <nav className="p-4 space-y-4">
+        <nav className="p-4 space-y-4 overflow-y-auto h-[calc(100vh-4rem)]">
           {navigation.map((section, sectionIdx) => (
             <div key={sectionIdx}>
               {section.title && (
@@ -86,6 +111,7 @@ export default function Layout({ children }: LayoutProps) {
                     <Link
                       key={item.name}
                       to={item.href}
+                      onClick={handleNavClick}
                       className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
                         isActive
                           ? 'bg-primary-600 text-white'
@@ -104,9 +130,16 @@ export default function Layout({ children }: LayoutProps) {
       </aside>
 
       {/* Main content */}
-      <main className="pl-64">
-        <header className="h-16 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-6">
-          <div />
+      <main className="lg:pl-64">
+        <header className="h-16 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-4 lg:px-6">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="lg:hidden p-2 text-gray-400 hover:text-white rounded-lg hover:bg-gray-700"
+          >
+            <Bars3Icon className="w-6 h-6" />
+          </button>
+          <div className="lg:hidden text-lg font-bold text-primary-400">Managarr</div>
+          <div className="hidden lg:block" />
           <div className="flex items-center gap-3">
             <ActivityIndicator />
             <Link
@@ -117,7 +150,7 @@ export default function Layout({ children }: LayoutProps) {
             </Link>
           </div>
         </header>
-        <div className="p-6">{children}</div>
+        <div className="p-4 lg:p-6">{children}</div>
       </main>
     </div>
   );
