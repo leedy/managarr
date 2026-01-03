@@ -1,6 +1,7 @@
 import 'dotenv/config';
-import { resolve } from 'path';
+import { resolve, join } from 'path';
 import { config } from 'dotenv';
+import { existsSync } from 'fs';
 
 // Load .env from project root
 config({ path: resolve(__dirname, '../../.env') });
@@ -22,20 +23,31 @@ import { tmdbRoutes } from './routes/tmdb.js';
 const PORT = process.env.PORT || 3005;
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/managarr';
 const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5179';
+const isProduction = process.env.NODE_ENV === 'production';
 
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: CLIENT_URL,
+    origin: isProduction ? true : CLIENT_URL,
     methods: ['GET', 'POST'],
   },
 });
 
 // Middleware
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: isProduction ? {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https:", "http:"],
+      connectSrc: ["'self'", "ws:", "wss:"],
+    },
+  } : false,
+}));
 app.use(cors({
-  origin: CLIENT_URL,
+  origin: isProduction ? true : CLIENT_URL,
 }));
 app.use(express.json());
 
@@ -52,6 +64,17 @@ app.use('/api/tmdb', tmdbRoutes);
 app.get('/api/ping', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
+
+// Serve static files in production
+const clientDistPath = join(__dirname, '../../client/dist');
+if (process.env.NODE_ENV === 'production' && existsSync(clientDistPath)) {
+  app.use(express.static(clientDistPath));
+
+  // SPA fallback - serve index.html for all non-API routes
+  app.get('*', (_req, res) => {
+    res.sendFile(join(clientDistPath, 'index.html'));
+  });
+}
 
 // Socket.IO connection handling
 io.on('connection', (socket) => {

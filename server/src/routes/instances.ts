@@ -61,8 +61,7 @@ router.post('/', async (req: Request, res: Response) => {
     const instance = new Instance(validated);
     await instance.save();
 
-    const response = instance.toObject();
-    delete (response as Record<string, unknown>).apiKey;
+    const { apiKey: _, ...response } = instance.toObject();
 
     res.status(201).json(response);
   } catch (error) {

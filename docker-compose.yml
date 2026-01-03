@@ -1,0 +1,31 @@
+services:
+  managarr:
+    build: .
+    container_name: managarr
+    restart: unless-stopped
+    ports:
+      - "3005:3005"
+    environment:
+      - NODE_ENV=production
+      - PORT=3005
+      - MONGODB_URI=mongodb://mongo:27017/managarr
+    depends_on:
+      - mongo
+    networks:
+      - managarr-network
+
+  mongo:
+    image: mongo:7
+    container_name: managarr-mongo
+    restart: unless-stopped
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - managarr-network
+
+networks:
+  managarr-network:
+    driver: bridge
+
+volumes:
+  mongo-data:
