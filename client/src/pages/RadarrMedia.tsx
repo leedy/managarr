@@ -20,7 +20,7 @@ import BulkPathEditModal from '../components/BulkPathEditModal';
 import PosterHover from '../components/PosterHover';
 import PosterCard from '../components/PosterCard';
 
-type SortField = 'title' | 'year' | 'path' | 'sizeOnDisk' | 'added';
+type SortField = 'title' | 'year' | 'path' | 'file' | 'quality' | 'sizeOnDisk' | 'hasFile' | 'monitored' | 'added';
 type SortDir = 'asc' | 'desc';
 type FilterMode = 'downloaded' | 'missing' | 'iso' | 'all';
 type ColumnKey = 'title' | 'year' | 'path' | 'file' | 'quality' | 'size' | 'hasFile' | 'monitored';
@@ -28,7 +28,7 @@ type ColumnKey = 'title' | 'year' | 'path' | 'file' | 'quality' | 'size' | 'hasF
 interface ColumnConfig {
   key: ColumnKey;
   label: string;
-  sortField?: SortField;
+  sortField: SortField;
   defaultWidth: number;
   minWidth: number;
 }
@@ -37,11 +37,11 @@ const COLUMNS: ColumnConfig[] = [
   { key: 'title', label: 'Title', sortField: 'title', defaultWidth: 200, minWidth: 100 },
   { key: 'year', label: 'Year', sortField: 'year', defaultWidth: 80, minWidth: 60 },
   { key: 'path', label: 'Path', sortField: 'path', defaultWidth: 300, minWidth: 150 },
-  { key: 'file', label: 'File', defaultWidth: 250, minWidth: 100 },
-  { key: 'quality', label: 'Quality', defaultWidth: 120, minWidth: 80 },
+  { key: 'file', label: 'File', sortField: 'file', defaultWidth: 250, minWidth: 100 },
+  { key: 'quality', label: 'Quality', sortField: 'quality', defaultWidth: 120, minWidth: 80 },
   { key: 'size', label: 'Size', sortField: 'sizeOnDisk', defaultWidth: 100, minWidth: 70 },
-  { key: 'hasFile', label: 'Has File', defaultWidth: 90, minWidth: 70 },
-  { key: 'monitored', label: 'Monitored', defaultWidth: 90, minWidth: 70 },
+  { key: 'hasFile', label: 'Has File', sortField: 'hasFile', defaultWidth: 90, minWidth: 70 },
+  { key: 'monitored', label: 'Monitored', sortField: 'monitored', defaultWidth: 90, minWidth: 70 },
 ];
 
 function formatBytes(bytes: number): string {
@@ -153,8 +153,20 @@ export default function RadarrMedia() {
         case 'path':
           cmp = a.path.localeCompare(b.path);
           break;
+        case 'file':
+          cmp = (a.movieFile?.relativePath || '').localeCompare(b.movieFile?.relativePath || '');
+          break;
+        case 'quality':
+          cmp = (qualityProfileMap[a.qualityProfileId] || '').localeCompare(qualityProfileMap[b.qualityProfileId] || '');
+          break;
         case 'sizeOnDisk':
           cmp = a.sizeOnDisk - b.sizeOnDisk;
+          break;
+        case 'hasFile':
+          cmp = (a.hasFile ? 1 : 0) - (b.hasFile ? 1 : 0);
+          break;
+        case 'monitored':
+          cmp = (a.monitored ? 1 : 0) - (b.monitored ? 1 : 0);
           break;
         case 'added':
           cmp = new Date(a.added).getTime() - new Date(b.added).getTime();
@@ -164,7 +176,7 @@ export default function RadarrMedia() {
     });
 
     return result;
-  }, [movies, search, sortField, sortDir, filterMode, pathFilter]);
+  }, [movies, search, sortField, sortDir, filterMode, pathFilter, qualityProfileMap]);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -493,11 +505,7 @@ export default function RadarrMedia() {
                     style={{ width: columnWidths[col.key], minWidth: col.minWidth }}
                   >
                     <div className="flex items-center justify-between pr-2">
-                      {col.sortField ? (
-                        <SortHeader field={col.sortField}>{col.label}</SortHeader>
-                      ) : (
-                        <span>{col.label}</span>
-                      )}
+                      <SortHeader field={col.sortField}>{col.label}</SortHeader>
                     </div>
                     {/* Resize handle */}
                     <div
