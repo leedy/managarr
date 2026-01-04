@@ -11,7 +11,6 @@ import {
   PlayIcon,
   ArrowsRightLeftIcon,
   ExclamationTriangleIcon,
-  DocumentDuplicateIcon,
   ArrowDownTrayIcon,
   ClockIcon,
   Bars3Icon,
@@ -51,7 +50,6 @@ const navigation: NavSection[] = [
       { name: 'Disk Space', href: '/disk-space', icon: CircleStackIcon },
       { name: 'Compare', href: '/compare', icon: ArrowsRightLeftIcon },
       { name: 'Cutoff Unmet', href: '/cutoff', icon: ExclamationTriangleIcon },
-      { name: 'Duplicates', href: '/duplicates', icon: DocumentDuplicateIcon },
     ],
   },
   {

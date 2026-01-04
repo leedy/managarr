@@ -23,6 +23,11 @@ npm run build
 
 # Lint both workspaces
 npm run lint
+
+# Persistent development with pm2 (uses ecosystem.config.cjs)
+pm2 start ecosystem.config.cjs
+pm2 logs managarr-backend
+pm2 logs managarr-frontend
 ```
 
 ## Architecture
@@ -85,9 +90,16 @@ for (const instance of instances) {
 
 Copy `.env.example` to `.env`:
 - `PORT` - Server port (default: 3005)
-- `MONGODB_URI` - MongoDB connection string
+- `MONGODB_URI` - Full MongoDB connection string (takes precedence if set)
+- `MONGODB_HOST`, `MONGODB_PORT`, `MONGODB_USER`, `MONGODB_PASSWORD`, `MONGODB_DATABASE` - Individual MongoDB config (alternative to URI)
 - `CLIENT_URL` - Frontend URL for CORS (default: http://localhost:5179)
 - `VITE_PORT` - Vite dev server port
+
+## Docker Deployment
+
+Pre-built images are published to `ghcr.io/leedy/managarr:latest` via GitHub Actions on push to main.
+
+For Portainer/Unraid deployment, use Web editor (not Git repository) to preserve environment variables across redeployments.
 
 ## Page Structure
 
@@ -102,4 +114,3 @@ Copy `.env.example` to `.env`:
 | Disk Space | Storage analysis |
 | Compare | Cross-instance library comparison |
 | Cutoff Unmet | Media below quality cutoff |
-| Duplicates | Media in multiple instances |

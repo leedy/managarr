@@ -10,7 +10,6 @@ import DiskSpace from './pages/DiskSpace';
 import PlexLibrary from './pages/PlexLibrary';
 import Compare from './pages/Compare';
 import CutoffUnmet from './pages/CutoffUnmet';
-import Duplicates from './pages/Duplicates';
 import Queue from './pages/Queue';
 import Activity from './pages/Activity';
 import Settings from './pages/Settings';
@@ -30,7 +29,6 @@ function App() {
         <Route path="/disk-space" element={<DiskSpace />} />
         <Route path="/compare" element={<Compare />} />
         <Route path="/cutoff" element={<CutoffUnmet />} />
-        <Route path="/duplicates" element={<Duplicates />} />
         <Route path="/queue" element={<Queue />} />
         <Route path="/activity" element={<Activity />} />
         <Route path="/settings" element={<Settings />} />
